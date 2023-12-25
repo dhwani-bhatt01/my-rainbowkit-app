@@ -1,12 +1,17 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { ethers, Wallet } from "ethers";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import contractABI from "../Abi.json";
+import { CONTRACT_ADDRESS, PRIVATE_KEY, PROVIDER_URL } from "../config";
 import styles from "../styles/Home.module.css";
 
 const Home: NextPage = () => {
 	const [address, setAddress] = useState<string | null>(null);
+	// const provider = usePublicClient();
+	// const { data: walletClient } = useWalletClient();
 
 	const { isConnected } = useAccount({
 		onConnect: ({ address, isReconnected, connector }) => {
@@ -19,10 +24,36 @@ const Home: NextPage = () => {
 		},
 	});
 
-	const handleClaimClick = () => {
+	const handleClaimClick = async () => {
 		const timeStamp = new Date().toISOString();
 		const alertMessage = `${address} has connected at ${timeStamp}`;
 		alert(alertMessage);
+
+		try {
+			// Replace 'YourContractAddress' and 'YourPrivateKey' with your actual contract address and private key
+			const provider = new ethers.JsonRpcProvider(PROVIDER_URL);
+			const wallet = new Wallet(PRIVATE_KEY, provider);
+
+			// Load ABI from the JSON file
+			const abi: any[] = contractABI;
+
+			//rainbowkit contract
+			const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
+
+			// Call the claim function on the smart contract
+			const transaction = await contract.claim(address);
+
+			// Wait for the transaction to be mined
+			await transaction.wait();
+
+			const transactionHash = transaction.hash;
+
+			alert(`Claim successful!\nTransaction Hash: ${transactionHash}`);
+			console.log("Claim successful!");
+		} catch (error) {
+			console.error(error);
+			alert("Claim failed!, please try again");
+		}
 	};
 
 	return (
@@ -56,7 +87,7 @@ const Home: NextPage = () => {
 
 			<footer className={styles.footer}>
 				<a href="https://rainbow.me" rel="noopener noreferrer" target="_blank">
-					Made with ❤️ by your frens at 🌈
+					Made with ❤️
 				</a>
 			</footer>
 		</div>

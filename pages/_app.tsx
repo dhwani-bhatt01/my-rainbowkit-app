@@ -1,53 +1,54 @@
-import '../styles/globals.css';
-import '@rainbow-me/rainbowkit/styles.css';
-import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import type { AppProps } from 'next/app';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
+import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import "@rainbow-me/rainbowkit/styles.css";
+import type { AppProps } from "next/app";
+import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import {
-  arbitrum,
-  goerli,
-  mainnet,
-  optimism,
-  polygon,
-  base,
-  zora,
-} from 'wagmi/chains';
-import { publicProvider } from 'wagmi/providers/public';
+	arbitrum,
+	base,
+	goerli,
+	mainnet,
+	optimism,
+	polygon,
+	zora,
+} from "wagmi/chains";
+import { publicProvider } from "wagmi/providers/public";
+import "../styles/globals.css";
+import { chains } from "../wagmi";
 
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [
-    mainnet,
-    polygon,
-    optimism,
-    arbitrum,
-    base,
-    zora,
-    ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true' ? [goerli] : []),
-  ],
-  [publicProvider()]
+const { publicClient, webSocketPublicClient } = configureChains(
+	[
+		mainnet,
+		polygon,
+		optimism,
+		arbitrum,
+		base,
+		zora,
+		...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === "true" ? [goerli] : []),
+	],
+	[publicProvider()]
 );
 
 const { connectors } = getDefaultWallets({
-  appName: 'RainbowKit App',
-  projectId: 'YOUR_PROJECT_ID',
-  chains,
+	appName: "RainbowKit App",
+	projectId: "ee56c353983496c87480ff2ae841a933",
+	chains,
 });
 
 const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors,
-  publicClient,
-  webSocketPublicClient,
+	autoConnect: true,
+	connectors,
+	publicClient,
+	webSocketPublicClient,
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return (
-    <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider chains={chains}>
-        <Component {...pageProps} />
-      </RainbowKitProvider>
-    </WagmiConfig>
-  );
+	return (
+		<WagmiConfig config={wagmiConfig}>
+			<RainbowKitProvider chains={chains}>
+				<Component {...pageProps} />
+			</RainbowKitProvider>
+		</WagmiConfig>
+	);
 }
 
 export default MyApp;
